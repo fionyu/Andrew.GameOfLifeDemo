@@ -20,14 +20,6 @@ namespace GameHost1
             this.Height = depth;
         }
 
-        private Map(Cell[,] matrix)
-        {
-            this.Width = matrix.GetLength(0);
-            this.Height = matrix.GetLength(1);
-            this.Matrix = matrix;
-            SetPartners();
-        }
-
         /// <summary>
         /// 初始化
         /// </summary>
@@ -74,8 +66,6 @@ namespace GameHost1
         {
             Clock clock = new Clock();
 
-            yield return (TimeSpan.Zero, this.Matrix);
-
             while (true)
             {
                 var elapsed = clock.Elapsed;
@@ -87,7 +77,7 @@ namespace GameHost1
                     for (int x = 0; x < this.Width; x++)
                         Matrix[x, y].PushToNextFrame(index);
 
-                if (index != 0 && index % this.Interval == 0) 
+                if (index % this.Interval == 0) 
                     yield return Snapshot(elapsed);
 
                 if(realtime)
@@ -99,7 +89,8 @@ namespace GameHost1
 
         private (TimeSpan time, ILife[,] matrix) Snapshot(TimeSpan elapsed) 
         {
-            return (elapsed, this.GetNextGeneration().Matrix);
+            SetPartners();
+            return (elapsed, this.Matrix);
         }
 
         private void SetPartners()
@@ -128,17 +119,6 @@ namespace GameHost1
                     Matrix[x, y].Partners = partners;
                 }
             }
-        }
-
-        private Map GetNextGeneration()
-        {
-            var next = new Map(this.Matrix);
-
-            for (int y = 0; y < this.Height; y++)
-                for (int x = 0; x < this.Width; x++)
-                    next.Matrix[x, y].IsAlive = Matrix[x, y].IsAlive;
-
-            return next;
         }
     }
 }
